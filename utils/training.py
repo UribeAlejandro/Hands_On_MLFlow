@@ -1,8 +1,4 @@
-import os
-from typing import Tuple
-
 import mlflow
-import pandas as pd
 from sklearn.metrics import accuracy_score, fbeta_score
 
 
@@ -18,7 +14,7 @@ def experiment_low_level(X_train, X_test, y_train, y_test, model):
         y_test, model.predict(X_test), beta=2, average="macro"
     )
 
-    with mlflow.start_run(experiment_id="1") as run:
+    with mlflow.start_run(experiment_id="2") as run:
         metrics = {
             "accuracy_score_train": accuracy_score(
                 y_train, model.predict(X_train)
@@ -44,9 +40,9 @@ def experiment_low_level(X_train, X_test, y_train, y_test, model):
 # 2
 def experiment_auto_logger(X_train, X_test, y_train, y_test, model):
 
-    mlflow.sklearn.autolog()
+    mlflow.sklearn.autolog(log_input_examples=True)
 
-    with mlflow.start_run(experiment_id="1") as run:
+    with mlflow.start_run(experiment_id="2") as run:
         model.fit(X_train, y_train)
         mlflow.sklearn.eval_and_log_metrics(
             model, X_test, y_test, prefix="val_"

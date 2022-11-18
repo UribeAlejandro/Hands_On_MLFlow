@@ -1,5 +1,4 @@
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 
 from utils.etl import extract_data, transform_data
 from utils.ExperimentLogger import ExperimentLogger
@@ -13,6 +12,8 @@ def training_loop() -> None:
     X, y = extract_data()
     X, y = transform_data(X, y)
 
+    X = X / 255.0
+
     X_train, X_test, y_train, y_test = (
         X[:60000],
         X[60000:],
@@ -20,7 +21,7 @@ def training_loop() -> None:
         y[60000:],
     )
 
-    model = SGDClassifier(random_state=RANDOM_STATE, n_jobs=-1)
+    model = RandomForestClassifier(random_state=RANDOM_STATE, n_jobs=-1)
     model.fit(X_train, y_train)
 
     logger = ExperimentLogger(X_train, X_test, y_train, y_test, model)
