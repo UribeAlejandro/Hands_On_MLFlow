@@ -1,6 +1,6 @@
 from tensorflow.config.experimental import list_physical_devices
 from tensorflow.keras.callbacks import Callback
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
+from tensorflow.keras.layers import Conv1D, Dense, Flatten, MaxPooling1D
 from tensorflow.keras.models import Sequential
 
 from utils.etl import extract_data, transform_data
@@ -22,7 +22,7 @@ def training_loop() -> None:
 
     training_images, training_labels, test_images, test_labels = extract_data()
     training_images, test_images = transform_data(
-        training_images, test_images, False
+        training_images, test_images, True
     )
 
     accCallback = accuracyCallback()
@@ -35,10 +35,10 @@ def training_loop() -> None:
 
     model = Sequential(
         [
-            Conv2D(64, (3, 3), activation="relu", input_shape=(28, 28, 1)),
-            MaxPooling2D(2, 2),
-            Conv2D(64, (3, 3), activation="relu"),
-            MaxPooling2D(2, 2),
+            Conv1D(64, (3), activation="relu", input_shape=(154, 1)),
+            MaxPooling1D(2, 2),
+            Conv1D(64, (3), activation="relu"),
+            MaxPooling1D(2, 2),
             Flatten(),
             Dense(128, activation="relu"),
             Dense(10, activation="softmax"),

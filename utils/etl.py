@@ -29,11 +29,13 @@ def transform_data(
     training_images = training_images / 255.0 - 0.5
     test_images = test_images / 255.0 - 0.5
 
-    training_images = training_images.reshape(60000, 28, 28, 1)
-    test_images = test_images.reshape(10000, 28, 28, 1)
-
     if pca_bool:
         pca = PCA(0.95)
+
+        training_images = training_images.reshape(60000, 784)
         training_images = pca.fit_transform(training_images)
+    else:
+        training_images = training_images.reshape(60000, 28, 28, 1)
+        test_images = test_images.reshape(10000, 28, 28, 1)
 
     return training_images, test_images
