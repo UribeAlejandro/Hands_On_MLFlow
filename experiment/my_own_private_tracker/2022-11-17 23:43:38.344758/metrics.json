@@ -1,0 +1,1 @@
+{"training": {"accuracy_score": 0.8807666666666667, "f_beta_avg_macro": 0.8787542460266728}, "test": {"accuracy_score": 0.874, "f_beta_avg_macro": 0.8721140411758483}}
