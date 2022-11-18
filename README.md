@@ -27,7 +27,7 @@ Set the `MLFlow` environment variables as follows
 
 ```bash
 export MLFLOW_TRACKING_URI=sqlite:///experiment/mlflow/db/mydb.sqlite
-export ARTIFACT_ROOT=experiment/mlflow/mlruns/
+export ARTIFACT_ROOT=./experiment/mlflow/mlruns/
 ```
 
 You can also find them in [mlflow.cfg](mlflow.cfg).
