@@ -1,21 +1,39 @@
 from typing import Tuple
 
 import numpy as np
-import pandas as pd
-from sklearn.datasets import fetch_openml
+from sklearn.decomposition import PCA
+from tensorflow.keras.datasets import mnist
 
 
-def extract_data() -> Tuple[pd.DataFrame, pd.Series]:
+def extract_data() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    X, y = fetch_openml("mnist_784", version=1, return_X_y=True)
+    mnist_data = mnist
+    (training_images, training_labels), (
+        test_images,
+        test_labels,
+    ) = mnist_data.load_data()
 
-    return X, y
+    return training_images, training_labels, test_images, test_labels
 
 
 def transform_data(
-    X: pd.DataFrame, y: pd.Series
-) -> Tuple[pd.DataFrame, pd.Series]:
+    training_images: np.ndarray,
+    test_images: np.ndarray,
+    pca_bool: bool = False,
+) -> Tuple[np.ndarray, np.ndarray]:
 
-    y = y.astype(np.uint8)
+    training_images, test_images = training_images.astype(
+        "float32"
+    ), test_images.astype("float32")
 
-    return X, y
+    training_images = training_images / 255.0 - 0.5
+    test_images = test_images / 255.0 - 0.5
+
+    training_images = training_images.reshape(60000, 28, 28, 1)
+    test_images = test_images.reshape(10000, 28, 28, 1)
+
+    if pca_bool:
+        pca = PCA(0.95)
+        training_images = pca.fit_transform(training_images)
+
+    return training_images, test_images

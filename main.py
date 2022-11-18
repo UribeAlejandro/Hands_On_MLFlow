@@ -1,34 +1,68 @@
-from sklearn.ensemble import RandomForestClassifier
+from tensorflow.config.experimental import list_physical_devices
+from tensorflow.keras.callbacks import Callback
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
+from tensorflow.keras.models import Sequential
 
 from utils.etl import extract_data, transform_data
-from utils.ExperimentLogger import ExperimentLogger
-from utils.training import experiment_auto_logger, experiment_low_level
+from utils.training import experiment_auto_logger
 
 RANDOM_STATE = 42
+
+print("Num GPUs Available: ", len(list_physical_devices("GPU")))
+
+
+class accuracyCallback(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if logs.get("accuracy") > 0.998:
+            print("\nReached 99.8% accuracy so cancelling training!\n")
+            self.model.stop_training = True
 
 
 def training_loop() -> None:
 
-    X, y = extract_data()
-    X, y = transform_data(X, y)
-
-    X = X / 255.0
-
-    X_train, X_test, y_train, y_test = (
-        X[:60000],
-        X[60000:],
-        y[:60000],
-        y[60000:],
+    training_images, training_labels, test_images, test_labels = extract_data()
+    training_images, test_images = transform_data(
+        training_images, test_images, False
     )
 
-    model = RandomForestClassifier(random_state=RANDOM_STATE, n_jobs=-1)
-    model.fit(X_train, y_train)
+    accCallback = accuracyCallback()
 
-    logger = ExperimentLogger(X_train, X_test, y_train, y_test, model)
-    logger.log_experiment()
+    val_images = training_images[50000:]
+    val_labels = training_labels[50000:]
 
-    experiment_low_level(X_train, X_test, y_train, y_test, model)
-    experiment_auto_logger(X_train, X_test, y_train, y_test, model)
+    training_images = training_images[:50000]
+    training_labels = training_labels[:50000]
+
+    model = Sequential(
+        [
+            Conv2D(64, (3, 3), activation="relu", input_shape=(28, 28, 1)),
+            MaxPooling2D(2, 2),
+            Conv2D(64, (3, 3), activation="relu"),
+            MaxPooling2D(2, 2),
+            Flatten(),
+            Dense(128, activation="relu"),
+            Dense(10, activation="softmax"),
+        ]
+    )
+
+    model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+
+    print(model.summary())
+
+    experiment_auto_logger(
+        training_images,
+        val_images,
+        test_images,
+        training_labels,
+        val_labels,
+        test_labels,
+        model,
+        [accCallback],
+    )
 
 
 if __name__ == "__main__":
